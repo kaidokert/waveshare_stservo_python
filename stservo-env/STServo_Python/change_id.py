@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# *********     Sync Write Example      *********
+# *********     Gen Write Example      *********
 #
 #
 # Available STServo model on this example : All models using Protocol STS
@@ -14,6 +14,7 @@ if os.name == 'nt':
     import msvcrt
     def getch():
         return msvcrt.getch().decode()
+        
 else:
     import sys, tty, termios
     fd = sys.stdin.fileno()
@@ -27,23 +28,19 @@ else:
         return ch
 
 sys.path.append("..")
-from STservo_sdk import *                      # Uses STServo SDK library
+from STservo_sdk import *                 # Uses STServo SDK library
 
 # Default setting
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
 DEVICENAME                  = '/dev/tty.usbmodem585A0085751'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
-
-# STS_MINIMUM_POSITION_VALUE  = 0                 # STServo will rotate between this value
-# STS_MAXIMUM_POSITION_VALUE  = 4095
-STS_MINIMUM_POSITION_VALUE  = 1700           # STServo will rotate between this value
-STS_MAXIMUM_POSITION_VALUE  = 3800
-STS_MOVING_SPEED            = 2400              # STServo moving speed
-STS_MOVING_ACC              = 80                # STServo moving acc
+STS_MINIMUM_POSITION_VALUE  = 0           # STServo will rotate between this value
+STS_MAXIMUM_POSITION_VALUE  = 4095
+STS_MOVING_SPEED            = 2400        # STServo moving speed
+STS_MOVING_ACC              = 50          # STServo moving acc
 
 index = 0
 sts_goal_position = [STS_MINIMUM_POSITION_VALUE, STS_MAXIMUM_POSITION_VALUE]         # Goal position
-
 
 # Initialize PortHandler instance
 # Set the port path
@@ -53,7 +50,7 @@ portHandler = PortHandler(DEVICENAME)
 # Initialize PacketHandler instance
 # Get methods and members of Protocol
 packetHandler = sts(portHandler)
-
+    
 # Open port
 if portHandler.openPort():
     print("Succeeded to open the port")
@@ -62,7 +59,6 @@ else:
     print("Press any key to terminate...")
     getch()
     quit()
-
 
 # Set port baudrate
 if portHandler.setBaudRate(BAUDRATE):
@@ -73,30 +69,23 @@ else:
     getch()
     quit()
 
-while 1:
-    print("Press any key to continue! (or press ESC to quit!)")
-    if getch() == chr(0x1b):
-        break
-
-    for sts_id in range(1, 3):
-        # Add STServo#1~10 goal position\moving speed\moving accc value to the Syncwrite parameter storage
-        sts_addparam_result = packetHandler.SyncWritePosEx(sts_id, sts_goal_position[index], STS_MOVING_SPEED, STS_MOVING_ACC)
-        if sts_addparam_result != True:
-            print("[ID:%03d] groupSyncWrite addparam failed" % sts_id)
-
-    # Syncwrite goal position
-    sts_comm_result = packetHandler.groupSyncWrite.txPacket()
-    if sts_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(sts_comm_result))
-
-    # Clear syncwrite parameter storage
-    packetHandler.groupSyncWrite.clearParam()
-
-    # Change goal position
-    if index == 0:
-        index = 1
-    else:
-        index = 0
+# change the ID of the servo
+sts_id = 1
+new_id = 2
+packetHandler.unLockEprom(sts_id)
+sts_comm_result, sts_error = packetHandler.write1ByteTxRx(sts_id, STS_ID, new_id)
+# Verify the ID change
+new_id_read, comm_result, error = packetHandler.read1ByteTxRx(new_id, STS_ID)
+if comm_result != COMM_SUCCESS:
+    print("Failed to read new ID: %s" % packetHandler.getTxRxResult(comm_result))
+if error != 0:
+    print("Error occurred: %s" % packetHandler.getRxPacketError(error))
+else:
+    print("Successfully changed ID to %d" % new_id_read)
+packetHandler.LockEprom(sts_id)
+# # try to read the ID of the servo
+# sts_id = 2
+# sts_id_read, sts_comm_result, sts_error = packetHandler.read1ByteTxRx(sts_id, STS_ID)
 
 # Close port
 portHandler.closePort()

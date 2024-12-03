@@ -34,13 +34,17 @@ from STservo_sdk import *                   # Uses STServo SDK library
 
 # Default setting
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
+# DEVICENAME                  = 'COM11'    # Check which port is being used on your controller
 DEVICENAME                  = '/dev/tty.usbmodem585A0085751'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
-STS_MINIMUM_POSITION_VALUE  = 0             # SCServo will rotate between this value
-STS_MAXIMUM_POSITION_VALUE  = 4095
-STS_MOVING_SPEED            = 2400          # SCServo moving speed
-STS_MOVING_ACC              = 50            # SCServo moving acc
+# STS_MINIMUM_POSITION_VALUE  = 0             # SCServo will rotate between this value
+# STS_MAXIMUM_POSITION_VALUE  = 4095
+STS_MINIMUM_POSITION_VALUE  = 1248           # STServo will rotate between this value
+STS_MAXIMUM_POSITION_VALUE  = 2850
+# STS_MOVING_SPEED            = 2400          # SCServo moving speed
+STS_MOVING_SPEED            = 1800          # SCServo moving speed
+STS_MOVING_ACC              = 120            # SCServo moving acc
 
 index = 0
 sts_goal_position = [STS_MINIMUM_POSITION_VALUE, STS_MAXIMUM_POSITION_VALUE]         # Goal position
@@ -80,7 +84,7 @@ while 1:
     if getch() == chr(0x1b):
         break
 
-    for sts_id in range(1, 11):
+    for sts_id in range(1, 3):
         # Add SCServo#1~10 goal position\moving speed\moving accc value to the Syncwrite parameter storage
         sts_addparam_result = packetHandler.SyncWritePosEx(sts_id, sts_goal_position[index], STS_MOVING_SPEED, STS_MOVING_ACC)
         if sts_addparam_result != True:
@@ -96,8 +100,8 @@ while 1:
     time.sleep(0.002) #wait for servo status moving=1
     while 1:
         # Add parameter storage for STServo#1~10 present position value
-        for sts_id in range(1, 11):
-            sts_addparam_result = groupSyncRead.addParam(scs_id)
+        for sts_id in range(1, 3):
+            sts_addparam_result = groupSyncRead.addParam(sts_id)
             if sts_addparam_result != True:
                 print("[ID:%03d] groupSyncRead addparam failed" % sts_id)
 
@@ -105,8 +109,8 @@ while 1:
         if sts_comm_result != COMM_SUCCESS:
             print("%s" % packetHandler.getTxRxResult(sts_comm_result))
 
-        sts_last_moving = 0;
-        for sts_id in range(1, 11):
+        sts_last_moving = 0
+        for sts_id in range(1, 3):
             # Check if groupsyncread data of STServo#1~10 is available
             sts_data_result, sts_error = groupSyncRead.isAvailable(sts_id, STS_PRESENT_POSITION_L, 11)
             if sts_data_result == True:
