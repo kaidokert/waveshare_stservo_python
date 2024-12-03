@@ -109,3 +109,20 @@ class sts(protocol_packet_handler):
     def unLockEprom(self, sts_id):
         return self.write1ByteTxRx(sts_id, STS_LOCK, 0)
 
+    """NEW FUNCTIONS"""
+
+    def ReadVoltage(self, sts_id):
+        sts_present_voltage, sts_comm_result, sts_error = self.read1ByteTxRx(sts_id, STS_PRESENT_VOLTAGE)
+        return sts_present_voltage, sts_comm_result, sts_error
+
+    def ReadCurrent(self, sts_id):
+        sts_present_current, sts_comm_result, sts_error = self.read2ByteTxRx(sts_id, STS_PRESENT_CURRENT_L)
+        return self.sts_tohost(sts_present_current, 15), sts_comm_result, sts_error
+
+    def ReadTemperature(self, sts_id):
+        sts_present_temperature, sts_comm_result, sts_error = self.read1ByteTxRx(sts_id, STS_PRESENT_TEMPERATURE)
+        return sts_present_temperature, sts_comm_result, sts_error
+
+    def ReadLoad(self, sts_id):
+        sts_present_load, sts_comm_result, sts_error = self.read2ByteTxRx(sts_id, STS_PRESENT_LOAD_L)
+        return self.sts_tohost(sts_present_load, 15), sts_comm_result, sts_error
