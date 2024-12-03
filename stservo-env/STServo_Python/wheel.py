@@ -33,7 +33,7 @@ from STservo_sdk import *                 # Uses STServo SDK library
 # Default setting
 STS_ID                      = 1                 # STServo ID : 1
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
-DEVICENAME                  = 'COM11'    # Check which port is being used on your controller
+DEVICENAME                  = '/dev/tty.usbmodem585A0085751'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 STS_MOVING_SPEED0           = 2400        # STServo moving speed
 STS_MOVING_SPEED1           = -2400       # STServo moving speed

@@ -32,7 +32,7 @@ from STservo_sdk import *                 # Uses STServo SDK library
 
 # Default setting
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
-DEVICENAME                  = 'COM11'    # Check which port is being used on your controller
+DEVICENAME                  = '/dev/tty.usbmodem585A0085751'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 STS_MINIMUM_POSITION_VALUE  = 0           # STServo will rotate between this value
 STS_MAXIMUM_POSITION_VALUE  = 4095
