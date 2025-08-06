@@ -52,6 +52,8 @@ The GUI is the easiest way to get started:
 - 📈 **Live Monitoring** - real-time servo data
 - ⚙️ **Settings** - change servo IDs, limits, and calibration
 
+<img width="1020" height="755" alt="Screenshot from 2025-08-06 18-55-57" src="https://github.com/user-attachments/assets/b3f5b3d9-ae0a-4d5b-a184-6a13a79c087c" />
+
 ## 🎯 Try the Examples
 
 We've included lots of examples to help you learn:
