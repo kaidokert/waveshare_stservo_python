@@ -15,7 +15,7 @@ def load_device_port():
         str: Device port path, defaults to '/dev/ttyACM0' if not found
     """
     try:
-        config_file = os.path.join(os.path.dirname(__file__), '..', 'device_port.yaml')
+        config_file = os.path.join(os.path.dirname(__file__), 'device_port.yaml')
         with open(config_file, 'r') as file:
             config = yaml.safe_load(file)
             port = config.get('device_port', '/dev/ttyACM0')
