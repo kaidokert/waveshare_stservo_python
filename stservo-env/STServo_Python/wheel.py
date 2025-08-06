@@ -9,6 +9,7 @@
 
 import sys
 import os
+import yaml
 
 if os.name == 'nt':
     import msvcrt
@@ -30,11 +31,25 @@ else:
 sys.path.append("..")
 from STservo_sdk import *                 # Uses STServo SDK library
 
+def load_device_port():
+    """Load device port from YAML configuration file"""
+    try:
+        config_file = os.path.join(os.path.dirname(__file__), '..', 'device_port.yaml')
+        with open(config_file, 'r') as file:
+            config = yaml.safe_load(file)
+            return config.get('device_port', '/dev/ttyACM0')
+    except FileNotFoundError:
+        print("Warning: device_port.yaml not found. Using default port /dev/ttyACM0")
+        print("Run check_port.py first to detect your device port.")
+        return '/dev/ttyACM0'
+    except Exception as e:
+        print(f"Warning: Error reading device_port.yaml: {e}")
+        return '/dev/ttyACM0'
+
 # Default setting
-STS_ID                      = 1                 # STServo ID : 1
+STS_ID                      = 0                 # STServo ID : 1
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
-DEVICENAME                  = '/dev/tty.usbmodem585A0085751'    # Check which port is being used on your controller
-                                                # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
+DEVICENAME                  = load_device_port()  # Load port from YAML config
 STS_MOVING_SPEED0           = 2400        # STServo moving speed
 STS_MOVING_SPEED1           = -2400       # STServo moving speed
 STS_MOVING_ACC              = 50          # STServo moving acc

@@ -29,14 +29,14 @@ else:
 
 sys.path.append("..")
 from STservo_sdk import *                   # Uses STServo SDK library
+from device_config import load_device_port
 
 # Control table address
 
 # Default setting
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
 # DEVICENAME                  = 'COM11'    # Check which port is being used on your controller
-DEVICENAME                  = '/dev/tty.usbmodem585A0085751'    # Check which port is being used on your controller
-                                                # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
+DEVICENAME                  = load_device_port()  # Load port from YAML config
 
 # STS_MINIMUM_POSITION_VALUE  = 0             # SCServo will rotate between this value
 # STS_MAXIMUM_POSITION_VALUE  = 4095
@@ -84,7 +84,7 @@ while 1:
     if getch() == chr(0x1b):
         break
 
-    for sts_id in range(1, 3):
+    for sts_id in range(0, 3):
         # Add SCServo#1~10 goal position\moving speed\moving accc value to the Syncwrite parameter storage
         sts_addparam_result = packetHandler.SyncWritePosEx(sts_id, sts_goal_position[index], STS_MOVING_SPEED, STS_MOVING_ACC)
         if sts_addparam_result != True:

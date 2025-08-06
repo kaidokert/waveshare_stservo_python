@@ -1,1 +1,4 @@
+jinja2
+typeguard
 pyserial==3.5
+pyyaml

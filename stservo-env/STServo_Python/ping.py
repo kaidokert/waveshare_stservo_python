@@ -28,12 +28,12 @@ else:
 
 sys.path.append("..")
 from STservo_sdk import *                   # Uses STServo SDK library
+from device_config import load_device_port
 
 # Default setting
 STS_ID                  = 1                 # STServo ID : 1
 BAUDRATE                = 1000000           # STServo default baudrate : 1000000
-DEVICENAME              = '/dev/tty.usbmodem585A0085751'    # Check which port is being used on your controller
-                                            # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
+DEVICENAME              = load_device_port()  # Load port from YAML config
 
 # Initialize PortHandler instance
 # Set the port path
