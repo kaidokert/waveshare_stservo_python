@@ -7,7 +7,8 @@ def get_ports():
     return {port.device for port in list_ports.comports()}
 
 def main():
-    config_dir = os.path.dirname(__file__)
+    # config_dir = os.path.dirname(__file__)
+    config_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'config')
     os.makedirs(config_dir, exist_ok=True)
     config_file = os.path.join(config_dir, 'device_port.yaml')
 
