@@ -1116,7 +1116,7 @@ class STServoGUI:
         """Continuous monitoring loop"""
         while self.monitoring and self.connected:
             self.refresh_readings()
-            time.sleep(1)  # Update every second
+            time.sleep(0.05)  # Update every second
     
     # Reset Functions
     def reset_control_defaults(self):
