@@ -1846,27 +1846,38 @@ class STServoGUI:
         if not self.connected:
             messagebox.showerror("Error", "Not connected to servo")
             return
-        
+
         try:
-            self.packet_handler.unLockEprom(self.current_servo_id)
-            self.eprom_status_label.config(text="EPROM Status: Unlocked", foreground="red")
-            self.log_message(f"EPROM unlocked for servo ID {self.current_servo_id}")
+            comm_result, error = self.packet_handler.unLockEprom(self.current_servo_id)
+            if comm_result == COMM_SUCCESS and error == 0:
+                self.eprom_status_label.config(text="EPROM Status: Unlocked", foreground="red")
+                self.log_message(f"EPROM unlocked for servo ID {self.current_servo_id}")
+            else:
+                messagebox.showerror(
+                    "Error",
+                    f"Unlock EPROM failed: {self.packet_handler.getTxRxResult(comm_result)}"
+                )
         except Exception as e:
-            self.log_message(f"EPROM unlock error: {str(e)}")
-    
+            self.log_message(f"EPROM unlock error: {e!s}")
+
     def lock_eprom(self):
         """Lock EPROM to prevent accidental writes"""
         if not self.connected:
             messagebox.showerror("Error", "Not connected to servo")
             return
-        
+
         try:
-            self.packet_handler.LockEprom(self.current_servo_id)
-            self.eprom_status_label.config(text="EPROM Status: Locked", foreground="green")
-            self.log_message(f"EPROM locked for servo ID {self.current_servo_id}")
+            comm_result, error = self.packet_handler.LockEprom(self.current_servo_id)
+            if comm_result == COMM_SUCCESS and error == 0:
+                self.eprom_status_label.config(text="EPROM Status: Locked", foreground="green")
+                self.log_message(f"EPROM locked for servo ID {self.current_servo_id}")
+            else:
+                messagebox.showerror(
+                    "Error",
+                    f"Lock EPROM failed: {self.packet_handler.getTxRxResult(comm_result)}"
+                )
         except Exception as e:
-            self.log_message(f"EPROM lock error: {str(e)}")
-    
+            self.log_message(f"EPROM lock error: {e!s}")
     def read_all_registers(self):
         """Read all register values and display them"""
         if not self.connected:
