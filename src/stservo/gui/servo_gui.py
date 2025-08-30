@@ -1724,7 +1724,7 @@ class STServoGUI:
         else:
             self.reg_range_label.config(text=f"{reg_info['min']} - {reg_info['max']}")
         
-        self.reg_unit_label.config(text=reg_info['unit'] if reg_info['unit'] else "None")
+        self.reg_unit_label.config(text=reg_info['unit'] or "None")
         
         # Enable/disable write button based on permission
         if "write" in reg_info['permission']:
@@ -1753,9 +1753,16 @@ class STServoGUI:
             reg_info = self.registers[self.selected_register_addr]
             
             if reg_info['size'] == 1:
-                value, comm_result, error = self.packet_handler.read1ByteTxRx(self.current_servo_id, self.selected_register_addr)
+                value, comm_result, error = self.packet_handler.read1ByteTxRx(
+                    self.current_servo_id, self.selected_register_addr
+                )
             else:
-                value, comm_result, error = self.packet_handler.read2ByteTxRx(self.current_servo_id, self.selected_register_addr)
+                value, comm_result, error = self.packet_handler.read2ByteTxRx(
+                    self.current_servo_id, self.selected_register_addr
+                )
+                if reg_info['min'] < 0:
+                    # Decode unsigned 16-bit to signed if the register’s minimum is negative
+                    value = value - 0x10000 if value >= 0x8000 else value
             
             if comm_result == COMM_SUCCESS and error == 0:
                 self.reg_current_value_label.config(text=str(value))
@@ -1763,11 +1770,13 @@ class STServoGUI:
                 self.log_message(f"Read register 0x{self.selected_register_addr:02X}: {value}")
             else:
                 self.reg_current_value_label.config(text="Error")
-                self.log_message(f"Failed to read register 0x{self.selected_register_addr:02X}: {self.packet_handler.getTxRxResult(comm_result)}")
+                self.log_message(
+                    f"Failed to read register 0x{self.selected_register_addr:02X}: "
+                    f"{self.packet_handler.getTxRxResult(comm_result)}"
+                )
                 
         except Exception as e:
-            self.log_message(f"Register read error: {str(e)}")
-    
+            self.log_message(f"Register read error: {e!s}")
     def write_register(self):
         """Write value to the selected register"""
         if not self.connected:
