@@ -1797,10 +1797,10 @@ class STServoGUI:
             new_value = int(self.reg_new_value_var.get())
             
             # Validate range
-            if reg_info['min'] != -1 and reg_info['max'] != -1:
-                if new_value < reg_info['min'] or new_value > reg_info['max']:
-                    messagebox.showerror("Error", f"Value out of range ({reg_info['min']} - {reg_info['max']})")
-                    return
+            if reg_info['min'] != -1 and reg_info['max'] != -1 and (new_value < reg_info['min'] or new_value > reg_info['max']):
+                messagebox.showerror("Error", f"Value out of range ({reg_info['min']} - {reg_info['max']})")
+                return
+
             
             # Check if EPROM register needs unlocking
             if reg_info['type'] == "EPROM":
