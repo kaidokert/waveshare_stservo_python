@@ -1,8 +1,17 @@
 import sys
+import os
 import time
 import argparse
 from typing import Any, Tuple
 from stservo.sdk import *
+
+# Import config
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'config')))
+try:
+    from device_config import load_device_port
+except ImportError:
+    def load_device_port():
+        return "/dev/ttyACM0"
 
 # Register Addresses
 STS_TORQUE_ENABLE = 40
@@ -124,7 +133,7 @@ def main() -> None:
     parser.add_argument(
         "--port",
         type=str,
-        default="/dev/ttyACM0",
+        default=load_device_port(),
         help="The serial port for the servo controller (e.g., /dev/ttyUSB0 or COM3)."
     )
     parser.add_argument(
