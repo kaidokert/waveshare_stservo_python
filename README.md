@@ -59,6 +59,9 @@ The GUI is the easiest way to get started:
 We've included lots of examples to help you learn:
 
 ```bash
+# Move servo with ID 1 to position 500 at speed 2000, timeout 20s
+python -m examples.control.move_to_position --port COM3 --servo-id 1 --speed 2000 --timeout 20 500
+
 # Test connection to your servo
 python -m examples.discovery.ping_all
 
