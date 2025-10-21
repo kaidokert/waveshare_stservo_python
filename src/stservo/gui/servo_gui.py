@@ -65,6 +65,59 @@ class STServoGUI:
         self.control_mode = "single"  # "single" or "sync" mode
         self.is_scanning = False  # Track scanning state
         
+        # Register definitions from registers.csv
+        self.registers = {
+            0x00: {"name": "Firmware major version", "size": 1, "type": "EPROM", "permission": "read only", "min": -1, "max": -1, "unit": "", "default": 3},
+            0x01: {"name": "Firmware minor version", "size": 1, "type": "EPROM", "permission": "read only", "min": -1, "max": -1, "unit": "", "default": 7},
+            0x03: {"name": "Servo major version", "size": 1, "type": "EPROM", "permission": "read only", "min": -1, "max": -1, "unit": "", "default": 9},
+            0x04: {"name": "Servo minor version", "size": 1, "type": "EPROM", "permission": "read only", "min": -1, "max": -1, "unit": "", "default": 3},
+            0x05: {"name": "ID", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 253, "unit": "", "default": 1},
+            0x06: {"name": "Baudrate", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 7, "unit": "", "default": 0},
+            0x07: {"name": "Return delay", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "2us", "default": 0},
+            0x08: {"name": "Response status level", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 1, "unit": "", "default": 1},
+            0x09: {"name": "Minimum angle", "size": 2, "type": "EPROM", "permission": "read/write", "min": -32766, "max": -1, "unit": "Step", "default": 0},
+            0x0B: {"name": "Maximum angle", "size": 2, "type": "EPROM", "permission": "read/write", "min": -1, "max": 32767, "unit": "Step", "default": 4095},
+            0x0D: {"name": "Maximum temperature", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 100, "unit": "°C", "default": 70},
+            0x0E: {"name": "Maximum input voltage", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "0.1V", "default": 80},
+            0x0F: {"name": "Minimum input voltage", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "0.1V", "default": 40},
+            0x10: {"name": "Maximum torque", "size": 2, "type": "EPROM", "permission": "read/write", "min": 0, "max": 1000, "unit": "0.1%", "default": 1000},
+            0x12: {"name": "Phase", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "", "default": 12},
+            0x13: {"name": "Unloading conditions", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "", "default": 44},
+            0x14: {"name": "LED alarm conditions", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "", "default": 47},
+            0x15: {"name": "Position loop P coefficient", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "", "default": 32},
+            0x16: {"name": "Position loop D coefficient", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "", "default": 32},
+            0x17: {"name": "Position loop I coefficient", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "", "default": 0},
+            0x18: {"name": "Minimum starting force", "size": 2, "type": "EPROM", "permission": "read/write", "min": 0, "max": 1000, "unit": "0.1%", "default": 16},
+            0x1A: {"name": "Clockwise insensitive zone", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 32, "unit": "Step", "default": 1},
+            0x1B: {"name": "Anti-clockwise insensitive zone", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 32, "unit": "Step", "default": 1},
+            0x1C: {"name": "Protection current", "size": 2, "type": "EPROM", "permission": "read/write", "min": 0, "max": 511, "unit": "6.5mA", "default": 500},
+            0x1E: {"name": "Angle resolution", "size": 1, "type": "EPROM", "permission": "read/write", "min": 1, "max": 3, "unit": "", "default": 1},
+            0x1F: {"name": "Position correction", "size": 2, "type": "EPROM", "permission": "read/write", "min": -2047, "max": 2047, "unit": "Step", "default": 0},
+            0x21: {"name": "Operation mode", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 3, "unit": "", "default": 0},
+            0x22: {"name": "Protection torque", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 100, "unit": "1.0%", "default": 20},
+            0x23: {"name": "Protection time", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "10ms", "default": 200},
+            0x24: {"name": "Overload torque", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 100, "unit": "1.0%", "default": 80},
+            0x25: {"name": "Speed closed-loop P coefficient", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 100, "unit": "", "default": 10},
+            0x26: {"name": "Overcurrent protection time", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "10ms", "default": 200},
+            0x27: {"name": "Velocity closed-loop I coefficient", "size": 1, "type": "EPROM", "permission": "read/write", "min": 0, "max": 254, "unit": "1/10", "default": 10},
+            0x28: {"name": "Torque switch", "size": 1, "type": "SRAM", "permission": "read/write", "min": 0, "max": 128, "unit": "", "default": 0},
+            0x29: {"name": "Acceleration", "size": 1, "type": "SRAM", "permission": "read/write", "min": 0, "max": 254, "unit": "100 step/s²", "default": 0},
+            0x2A: {"name": "Target location", "size": 2, "type": "SRAM", "permission": "read/write", "min": -30719, "max": 30719, "unit": "Step", "default": 0},
+            0x2C: {"name": "Operation time", "size": 2, "type": "SRAM", "permission": "read/write", "min": 0, "max": 1000, "unit": "0.1%", "default": 0},
+            0x2E: {"name": "Operation speed", "size": 2, "type": "SRAM", "permission": "read/write", "min": 0, "max": -1, "unit": "step/s", "default": 0},
+            0x30: {"name": "Torque limit", "size": 2, "type": "SRAM", "permission": "read/write", "min": 0, "max": 1000, "unit": "1.0%", "default": 1000},
+            0x37: {"name": "Lock flag", "size": 1, "type": "SRAM", "permission": "read/write", "min": 0, "max": 1, "unit": "", "default": 0},
+            0x38: {"name": "Current location", "size": 2, "type": "SRAM", "permission": "read only", "min": -1, "max": -1, "unit": "Step", "default": 0},
+            0x3A: {"name": "Current speed", "size": 2, "type": "SRAM", "permission": "read only", "min": -1, "max": -1, "unit": "step/s", "default": 0},
+            0x3C: {"name": "Current load", "size": 2, "type": "SRAM", "permission": "read only", "min": -1, "max": -1, "unit": "0.1%", "default": 0},
+            0x3E: {"name": "Current voltage", "size": 1, "type": "SRAM", "permission": "read only", "min": -1, "max": -1, "unit": "0.1V", "default": 0},
+            0x3F: {"name": "Current temperature", "size": 1, "type": "SRAM", "permission": "read only", "min": -1, "max": -1, "unit": "°C", "default": 0},
+            0x40: {"name": "Asynchronous write flag", "size": 1, "type": "SRAM", "permission": "read only", "min": -1, "max": -1, "unit": "", "default": 0},
+            0x41: {"name": "Servo status", "size": 1, "type": "SRAM", "permission": "read only", "min": -1, "max": -1, "unit": "", "default": 0},
+            0x42: {"name": "Move flag", "size": 1, "type": "SRAM", "permission": "read only", "min": -1, "max": -1, "unit": "", "default": 0},
+            0x45: {"name": "Current current", "size": 2, "type": "SRAM", "permission": "read only", "min": -1, "max": -1, "unit": "6.5mA", "default": 0}
+        }
+        
         # Create the GUI
         self.create_widgets()
         
@@ -92,6 +145,9 @@ class STServoGUI:
         
         # Settings Tab
         self.create_settings_tab(notebook)
+        
+        # Registers Tab
+        self.create_registers_tab(notebook)
         
         # Status bar
         self.create_status_bar()
@@ -441,6 +497,107 @@ class STServoGUI:
         
         ttk.Button(reset_frame, text="Reset All to Defaults", command=self.reset_all_defaults).grid(row=0, column=0, padx=5, pady=5)
         ttk.Button(reset_frame, text="Reset Connection Settings", command=self.reset_connection_defaults).grid(row=0, column=1, padx=5, pady=5)
+    
+    def create_registers_tab(self, notebook):
+        """Create registers management tab"""
+        reg_frame = ttk.Frame(notebook)
+        notebook.add(reg_frame, text="Registers")
+        
+        # Register selection and info
+        selection_frame = ttk.LabelFrame(reg_frame, text="Register Selection")
+        selection_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Register dropdown
+        ttk.Label(selection_frame, text="Register:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+        self.register_var = tk.StringVar()
+        register_options = [f"0x{addr:02X} - {info['name']}" for addr, info in sorted(self.registers.items())]
+        self.register_combo = ttk.Combobox(selection_frame, textvariable=self.register_var, 
+                                         values=register_options, width=50, state="readonly")
+        self.register_combo.grid(row=0, column=1, padx=5, pady=2, sticky=tk.EW)
+        self.register_combo.bind('<<ComboboxSelected>>', self.on_register_select)
+        
+        # Register info display
+        info_frame = ttk.LabelFrame(reg_frame, text="Register Information")
+        info_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Info labels
+        ttk.Label(info_frame, text="Address:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+        self.reg_addr_label = ttk.Label(info_frame, text="--")
+        self.reg_addr_label.grid(row=0, column=1, sticky=tk.W, padx=5, pady=2)
+        
+        ttk.Label(info_frame, text="Size:").grid(row=0, column=2, sticky=tk.W, padx=5, pady=2)
+        self.reg_size_label = ttk.Label(info_frame, text="--")
+        self.reg_size_label.grid(row=0, column=3, sticky=tk.W, padx=5, pady=2)
+        
+        ttk.Label(info_frame, text="Type:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
+        self.reg_type_label = ttk.Label(info_frame, text="--")
+        self.reg_type_label.grid(row=1, column=1, sticky=tk.W, padx=5, pady=2)
+        
+        ttk.Label(info_frame, text="Permission:").grid(row=1, column=2, sticky=tk.W, padx=5, pady=2)
+        self.reg_permission_label = ttk.Label(info_frame, text="--")
+        self.reg_permission_label.grid(row=1, column=3, sticky=tk.W, padx=5, pady=2)
+        
+        ttk.Label(info_frame, text="Range:").grid(row=2, column=0, sticky=tk.W, padx=5, pady=2)
+        self.reg_range_label = ttk.Label(info_frame, text="--")
+        self.reg_range_label.grid(row=2, column=1, sticky=tk.W, padx=5, pady=2)
+        
+        ttk.Label(info_frame, text="Unit:").grid(row=2, column=2, sticky=tk.W, padx=5, pady=2)
+        self.reg_unit_label = ttk.Label(info_frame, text="--")
+        self.reg_unit_label.grid(row=2, column=3, sticky=tk.W, padx=5, pady=2)
+        
+        # Current value and controls
+        value_frame = ttk.LabelFrame(reg_frame, text="Register Value")
+        value_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(value_frame, text="Current Value:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+        self.reg_current_value_label = ttk.Label(value_frame, text="--", foreground="blue")
+        self.reg_current_value_label.grid(row=0, column=1, sticky=tk.W, padx=5, pady=2)
+        
+        ttk.Label(value_frame, text="New Value:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
+        self.reg_new_value_var = tk.StringVar()
+        self.reg_new_value_entry = ttk.Entry(value_frame, textvariable=self.reg_new_value_var, width=15)
+        self.reg_new_value_entry.grid(row=1, column=1, padx=5, pady=2)
+        
+        # Control buttons
+        btn_frame = ttk.Frame(value_frame)
+        btn_frame.grid(row=2, column=0, columnspan=3, pady=10)
+        
+        self.reg_read_btn = ttk.Button(btn_frame, text="Read Register", command=self.read_register)
+        self.reg_read_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.reg_write_btn = ttk.Button(btn_frame, text="Write Register", command=self.write_register)
+        self.reg_write_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.reg_reset_btn = ttk.Button(btn_frame, text="Reset to Default", command=self.reset_register_to_default)
+        self.reg_reset_btn.pack(side=tk.LEFT, padx=5)
+        
+        # EPROM control
+        eprom_frame = ttk.LabelFrame(reg_frame, text="EPROM Control")
+        eprom_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(eprom_frame, text="Unlock EPROM", command=self.unlock_eprom).grid(row=0, column=0, padx=5, pady=5)
+        ttk.Button(eprom_frame, text="Lock EPROM", command=self.lock_eprom).grid(row=0, column=1, padx=5, pady=5)
+        
+        self.eprom_status_label = ttk.Label(eprom_frame, text="EPROM Status: Unknown")
+        self.eprom_status_label.grid(row=0, column=2, padx=15, pady=5)
+        
+        # Bulk operations
+        bulk_frame = ttk.LabelFrame(reg_frame, text="Bulk Operations")
+        bulk_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        bulk_btn_frame = ttk.Frame(bulk_frame)
+        bulk_btn_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(bulk_btn_frame, text="Read All Registers", command=self.read_all_registers).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bulk_btn_frame, text="Export to File", command=self.export_registers).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bulk_btn_frame, text="Clear Results", command=self.clear_register_results).pack(side=tk.LEFT, padx=5)
+        
+        # Results display
+        self.register_results_text = scrolledtext.ScrolledText(bulk_frame, height=15, state=tk.DISABLED)
+        self.register_results_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Initialize
+        self.selected_register_addr = None
     
     def create_status_bar(self):
         """Create status bar"""
@@ -1544,6 +1701,300 @@ class STServoGUI:
         self.sync_results_text.config(state=tk.NORMAL)
         self.sync_results_text.delete(1.0, tk.END)
         self.sync_results_text.config(state=tk.DISABLED)
+    
+    # Register Management Methods
+    def on_register_select(self, event=None):
+        """Handle register selection from dropdown"""
+        if not self.register_var.get():
+            return
+        
+        # Extract address from selection
+        addr_str = self.register_var.get().split(' - ')[0]
+        self.selected_register_addr = int(addr_str, 16)
+        
+        # Update info display
+        reg_info = self.registers[self.selected_register_addr]
+        self.reg_addr_label.config(text=f"0x{self.selected_register_addr:02X} ({self.selected_register_addr})")
+        self.reg_size_label.config(text=f"{reg_info['size']} byte(s)")
+        self.reg_type_label.config(text=reg_info['type'])
+        self.reg_permission_label.config(text=reg_info['permission'])
+        
+        if reg_info['min'] == -1 and reg_info['max'] == -1:
+            self.reg_range_label.config(text="N/A")
+        else:
+            self.reg_range_label.config(text=f"{reg_info['min']} - {reg_info['max']}")
+        
+        self.reg_unit_label.config(text=reg_info['unit'] or "None")
+        
+        # Enable/disable write button based on permission
+        if "write" in reg_info['permission']:
+            self.reg_write_btn.config(state=tk.NORMAL)
+            self.reg_reset_btn.config(state=tk.NORMAL)
+            self.reg_new_value_entry.config(state=tk.NORMAL)
+        else:
+            self.reg_write_btn.config(state=tk.DISABLED)
+            self.reg_reset_btn.config(state=tk.DISABLED)
+            self.reg_new_value_entry.config(state=tk.DISABLED)
+        
+        # Auto-read the register value
+        self.read_register()
+    
+    def read_register(self):
+        """Read the selected register value"""
+        if not self.connected:
+            messagebox.showerror("Error", "Not connected to servo")
+            return
+        
+        if self.selected_register_addr is None:
+            messagebox.showerror("Error", "No register selected")
+            return
+        
+        try:
+            reg_info = self.registers[self.selected_register_addr]
+            
+            if reg_info['size'] == 1:
+                value, comm_result, error = self.packet_handler.read1ByteTxRx(
+                    self.current_servo_id, self.selected_register_addr
+                )
+            else:
+                value, comm_result, error = self.packet_handler.read2ByteTxRx(
+                    self.current_servo_id, self.selected_register_addr
+                )
+                if reg_info['min'] < 0:
+                    # Decode unsigned 16-bit to signed if the register’s minimum is negative
+                    value = value - 0x10000 if value >= 0x8000 else value
+            
+            if comm_result == COMM_SUCCESS and error == 0:
+                self.reg_current_value_label.config(text=str(value))
+                self.reg_new_value_var.set(str(value))
+                self.log_message(f"Read register 0x{self.selected_register_addr:02X}: {value}")
+            else:
+                self.reg_current_value_label.config(text="Error")
+                self.log_message(
+                    f"Failed to read register 0x{self.selected_register_addr:02X}: "
+                    f"{self.packet_handler.getTxRxResult(comm_result)}"
+                )
+                
+        except Exception as e:
+            self.log_message(f"Register read error: {e!s}")
+    def write_register(self):
+        """Write value to the selected register"""
+        if not self.connected:
+            messagebox.showerror("Error", "Not connected to servo")
+            return
+        
+        if self.selected_register_addr is None:
+            messagebox.showerror("Error", "No register selected")
+            return
+        
+        try:
+            reg_info = self.registers[self.selected_register_addr]
+            
+            if "write" not in reg_info['permission']:
+                messagebox.showerror("Error", "Register is read-only")
+                return
+            
+            new_value = int(self.reg_new_value_var.get())
+            
+            # Validate range
+            if reg_info['min'] != -1 and reg_info['max'] != -1 and (new_value < reg_info['min'] or new_value > reg_info['max']):
+                messagebox.showerror("Error", f"Value out of range ({reg_info['min']} - {reg_info['max']})")
+                return
+
+            
+            # Check if EPROM register needs unlocking
+            if reg_info['type'] == "EPROM":
+                # Confirm EPROM write
+                if not messagebox.askyesno("Confirm EPROM Write", 
+                                         f"Writing to EPROM register 0x{self.selected_register_addr:02X} ({reg_info['name']}).\n"
+                                         f"This change will be permanent.\n\nContinue?"):
+                    return
+                
+                # Unlock EPROM first
+                self.packet_handler.unLockEprom(self.current_servo_id)
+                self.log_message(f"Unlocked EPROM for servo ID {self.current_servo_id}")
+            
+            # Write value
+            if reg_info['size'] == 1:
+                comm_result, error = self.packet_handler.write1ByteTxRx(self.current_servo_id, self.selected_register_addr, new_value)
+            else:
+                comm_result, error = self.packet_handler.write2ByteTxRx(self.current_servo_id, self.selected_register_addr, new_value)
+            
+            if comm_result == COMM_SUCCESS and error == 0:
+                self.log_message(f"Wrote register 0x{self.selected_register_addr:02X}: {new_value}")
+                
+                # Re-read to verify
+                self.read_register()
+                
+                if reg_info['type'] == "EPROM":
+                    # Lock EPROM after write
+                    self.packet_handler.LockEprom(self.current_servo_id)
+                    self.log_message(f"Locked EPROM for servo ID {self.current_servo_id}")
+                    messagebox.showinfo("Success", f"Register written successfully: {new_value}")
+            else:
+                self.log_message(f"Failed to write register 0x{self.selected_register_addr:02X}: {self.packet_handler.getTxRxResult(comm_result)}")
+                if reg_info['type'] == "EPROM":
+                    # Lock EPROM even on failure
+                    self.packet_handler.LockEprom(self.current_servo_id)
+                
+        except ValueError:
+            messagebox.showerror("Error", "Invalid value format")
+        except Exception as e:
+            self.log_message(f"Register write error: {str(e)}")
+    
+    def reset_register_to_default(self):
+        """Reset register to its default value"""
+        if self.selected_register_addr is None:
+            return
+        
+        reg_info = self.registers[self.selected_register_addr]
+        self.reg_new_value_var.set(str(reg_info['default']))
+    
+    def unlock_eprom(self):
+        """Unlock EPROM for writing"""
+        if not self.connected:
+            messagebox.showerror("Error", "Not connected to servo")
+            return
+
+        try:
+            comm_result, error = self.packet_handler.unLockEprom(self.current_servo_id)
+            if comm_result == COMM_SUCCESS and error == 0:
+                self.eprom_status_label.config(text="EPROM Status: Unlocked", foreground="red")
+                self.log_message(f"EPROM unlocked for servo ID {self.current_servo_id}")
+            else:
+                messagebox.showerror(
+                    "Error",
+                    f"Unlock EPROM failed: {self.packet_handler.getTxRxResult(comm_result)}"
+                )
+        except Exception as e:
+            self.log_message(f"EPROM unlock error: {e!s}")
+
+    def lock_eprom(self):
+        """Lock EPROM to prevent accidental writes"""
+        if not self.connected:
+            messagebox.showerror("Error", "Not connected to servo")
+            return
+
+        try:
+            comm_result, error = self.packet_handler.LockEprom(self.current_servo_id)
+            if comm_result == COMM_SUCCESS and error == 0:
+                self.eprom_status_label.config(text="EPROM Status: Locked", foreground="green")
+                self.log_message(f"EPROM locked for servo ID {self.current_servo_id}")
+            else:
+                messagebox.showerror(
+                    "Error",
+                    f"Lock EPROM failed: {self.packet_handler.getTxRxResult(comm_result)}"
+                )
+        except Exception as e:
+            self.log_message(f"EPROM lock error: {e!s}")
+    def read_all_registers(self):
+        """Read all register values and display them"""
+        if not self.connected:
+            messagebox.showerror("Error", "Not connected to servo")
+            return
+        
+        try:
+            self.register_results_text.config(state=tk.NORMAL)
+            self.register_results_text.delete(1.0, tk.END)
+            
+            timestamp = datetime.now().strftime("%H:%M:%S")
+            self.register_results_text.insert(tk.END, f"Register dump for Servo ID {self.current_servo_id} at {timestamp}\n")
+            self.register_results_text.insert(tk.END, "="*80 + "\n\n")
+            
+            for addr in sorted(self.registers.keys()):
+                reg_info = self.registers[addr]
+                
+                try:
+                    if reg_info['size'] == 1:
+                        value, comm_result, error = self.packet_handler.read1ByteTxRx(self.current_servo_id, addr)
+                    else:
+                        value, comm_result, error = self.packet_handler.read2ByteTxRx(self.current_servo_id, addr)
+                    
+                    if comm_result == COMM_SUCCESS and error == 0:
+                        value_str = f"{value:4d}"
+                        if reg_info['unit']:
+                            value_str += f" {reg_info['unit']}"
+                    else:
+                        value_str = "Error"
+                    
+                    line = f"0x{addr:02X} ({addr:3d}) - {reg_info['name']:<30} : {value_str:<15} [{reg_info['type']}, {reg_info['permission']}]\n"
+                    self.register_results_text.insert(tk.END, line)
+                    
+                except Exception as e:
+                    line = f"0x{addr:02X} ({addr:3d}) - {reg_info['name']:<30} : Error: {str(e)}\n"
+                    self.register_results_text.insert(tk.END, line)
+                
+                # Small delay and update UI
+                self.root.update_idletasks()
+                time.sleep(0.01)
+            
+            self.register_results_text.insert(tk.END, "\nRegister dump complete.\n")
+            self.register_results_text.see(tk.END)
+            self.register_results_text.config(state=tk.DISABLED)
+            self.log_message(f"Read all registers for servo ID {self.current_servo_id}")
+            
+        except Exception as e:
+            self.log_message(f"Read all registers error: {str(e)}")
+    
+    def export_registers(self):
+        """Export register values to a file"""
+        if not self.connected:
+            messagebox.showerror("Error", "Not connected to servo")
+            return
+        
+        try:
+            from tkinter import filedialog
+            filename = filedialog.asksaveasfilename(
+                defaultextension=".txt",
+                filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+                title="Export Register Values"
+            )
+            
+            if not filename:
+                return
+            
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            with open(filename, 'w') as f:
+                f.write(f"STServo Register Export\n")
+                f.write(f"Servo ID: {self.current_servo_id}\n")
+                f.write(f"Timestamp: {timestamp}\n")
+                f.write("="*80 + "\n\n")
+                
+                for addr in sorted(self.registers.keys()):
+                    reg_info = self.registers[addr]
+                    
+                    try:
+                        if reg_info['size'] == 1:
+                            value, comm_result, error = self.packet_handler.read1ByteTxRx(self.current_servo_id, addr)
+                        else:
+                            value, comm_result, error = self.packet_handler.read2ByteTxRx(self.current_servo_id, addr)
+                        
+                        if comm_result == COMM_SUCCESS and error == 0:
+                            value_str = f"{value:4d}"
+                            if reg_info['unit']:
+                                value_str += f" {reg_info['unit']}"
+                        else:
+                            value_str = "Error"
+                        
+                        line = f"0x{addr:02X} ({addr:3d}) - {reg_info['name']:<30} : {value_str:<15} [{reg_info['type']}, {reg_info['permission']}]\n"
+                        f.write(line)
+                        
+                    except Exception as e:
+                        line = f"0x{addr:02X} ({addr:3d}) - {reg_info['name']:<30} : Error: {str(e)}\n"
+                        f.write(line)
+            
+            self.log_message(f"Registers exported to {filename}")
+            messagebox.showinfo("Export Complete", f"Register values exported to {filename}")
+            
+        except Exception as e:
+            self.log_message(f"Export error: {str(e)}")
+    
+    def clear_register_results(self):
+        """Clear register results display"""
+        self.register_results_text.config(state=tk.NORMAL)
+        self.register_results_text.delete(1.0, tk.END)
+        self.register_results_text.config(state=tk.DISABLED)
 
 def main():
     root = tk.Tk()
